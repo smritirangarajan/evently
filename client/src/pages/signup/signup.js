@@ -70,6 +70,7 @@ export default function SignUp() {
         phone: formData.phone,
         birthday: formData.birthday,
         pronouns: formData.pronouns,
+        city: "Berkeley",
         preferences: formData.preferences,
         email: formData.email,
       });

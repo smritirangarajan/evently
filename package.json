@@ -2,12 +2,11 @@
   "name": "evently",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "client": "cd client && npm start",
-    "server": "cd server && nodemon index.js"
-  },
+ "scripts": {
+  "dev": "concurrently \"npm run server\" \"npm run client\"",
+  "client": "npm start --prefix client",
+  "server": "nodemon server/index.js"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smritirangarajan/evently.git"
@@ -21,7 +20,8 @@
   "homepage": "https://github.com/smritirangarajan/evently#readme",
   "description": "",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.10"
   },
   "dependencies": {
     "firebase": "^11.6.1"
