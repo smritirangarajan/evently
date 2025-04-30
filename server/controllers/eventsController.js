@@ -1,13 +1,21 @@
 const axios = require('axios');
 
 const keywordMap = {
-    "chill": ["theater", "art", "classical music"],
-    "party": ["concert", "music festival", "nightlife"],
-    "sports": ["sports", "basketball", "soccer"],
-    "family": ["family", "kids", "community"],
-    "adventure": ["outdoor", "hiking", "festivals"],
-    "foodie": ["food festival", "wine tasting", "culinary"]
-  };
+  "concerts": ["concert", "music", "live"],
+  "theater": ["theater", "musical", "broadway"],
+  "comedy": ["comedy", "stand up", "humor"],
+  "film": ["movie", "film screening", "cinema"],
+  "art exhibits": ["art", "gallery", "exhibit"],
+  "dance": ["dance", "ballet", "performance"],
+  // optional moods still supported
+  "chill": ["theater", "art", "classical music"],
+  "party": ["concert", "music festival", "nightlife"],
+  "sports": ["sports", "basketball", "soccer"],
+  "family": ["family", "kids", "community"],
+  "adventure": ["outdoor", "hiking", "festivals"],
+  "foodie": ["food festival", "wine tasting", "culinary"]
+};
+
 
 module.exports = {
   searchTicketmasterEvents: async (req, res) => {

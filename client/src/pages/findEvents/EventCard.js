@@ -1,4 +1,5 @@
 import React from 'react';
+import './EventCard.css';
 
 function EventCard({ event, onViewDetails, onAddEvent }) {
   const imageUrl = event.images?.[0]?.url;
@@ -23,41 +24,22 @@ function EventCard({ event, onViewDetails, onAddEvent }) {
   };
 
   return (
-    <div className="flex flex-col bg-white border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition-all w-60 h-80 overflow-hidden">
+    <div className="event-card">
       {imageUrl && (
-        <img
-          src={imageUrl}
-          alt={name}
-          className="w-full h-36 object-cover"
-          onClick={onViewDetails}
-        />
-      )}
-      <div className="flex flex-col justify-between flex-grow p-4">
-        <div className="flex flex-col space-y-1 text-center">
-          <h2 className="text-md font-semibold text-gray-800 truncate">{name}</h2>
-          <p className="text-sm text-gray-600">{new Date(date).toLocaleDateString()}</p>
-          <p className="text-sm text-gray-500 truncate">{venue}</p>
+        <div className="event-card-image-container">
+          <img src={imageUrl} alt={name} onClick={onViewDetails} />
         </div>
-
-        <div className="flex flex-col items-center space-y-2 mt-4">
-          <button 
-            className="bg-blue-500 text-white text-xs py-1 px-3 rounded hover:bg-blue-600 w-full"
-            onClick={onViewDetails}
-          >
-            View Details
-          </button>
-          <button 
-            className="bg-green-500 text-white text-xs py-1 px-3 rounded hover:bg-green-600 w-full"
-            onClick={() => onAddEvent(event)}
-          >
-            + Add to My Events
-          </button>
-          <button 
-            className="bg-purple-500 text-white text-xs py-1 px-3 rounded hover:bg-purple-600 w-full"
-            onClick={addToGoogleCalendar}
-          >
-            + Add to Calendar
-          </button>
+      )}
+      <div className="event-card-content">
+        <div>
+          <h2>{name}</h2>
+          <p>{new Date(date).toLocaleDateString()}</p>
+          <p>{venue}</p>
+        </div>
+        <div className="event-card-buttons">
+          <button className="view-details" onClick={onViewDetails}>View Details</button>
+          <button className="add-event" onClick={() => onAddEvent(event)}>+ Add to My Events</button>
+          <button className="add-calendar" onClick={addToGoogleCalendar}>+ Add to Calendar</button>
         </div>
       </div>
     </div>
