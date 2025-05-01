@@ -15,6 +15,7 @@ function Dashboard() {
         Find Events
       </button>
       <button onClick={() => navigate('/my-events')}>My Events</button>
+      <button onClick={() => navigate('/upcoming-events')}>Upcoming Events</button>
 
 
       {/* Other dashboard content can go below */}

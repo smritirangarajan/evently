@@ -9,6 +9,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import FindEventsPage from './pages/findEvents/FindEventsPage';
 import EventDetailsPage from './pages/findEvents/EventDetailsPage';
 import MyEvents from './pages/dashboard/MyEvents';
+import UpcomingEvents from './pages/findEvents/UpcomingEvents.js';
 
 
 function App() {
@@ -23,6 +24,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/event/:eventId" element={<EventDetailsPage />} />
         <Route path="/my-events" element={<MyEvents />} />
+        <Route path="/upcoming-events" element={<UpcomingEvents />} />
+
 
       
       </Routes>
