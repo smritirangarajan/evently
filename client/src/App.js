@@ -8,6 +8,7 @@ import LandingPage from './pages/landing/LandingPage';
 import Dashboard from './pages/dashboard/Dashboard';
 import FindEventsPage from './pages/findEvents/FindEventsPage';
 import EventDetailsPage from './pages/findEvents/EventDetailsPage';
+import MyEvents from './pages/dashboard/MyEvents';
 
 
 function App() {
@@ -21,6 +22,8 @@ function App() {
         <Route path="/find-events" element={<FindEventsPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/event/:eventId" element={<EventDetailsPage />} />
+        <Route path="/my-events" element={<MyEvents />} />
+
       
       </Routes>
     </Router>

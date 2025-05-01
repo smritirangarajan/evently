@@ -14,6 +14,8 @@ function Dashboard() {
       >
         Find Events
       </button>
+      <button onClick={() => navigate('/my-events')}>My Events</button>
+
 
       {/* Other dashboard content can go below */}
     </div>

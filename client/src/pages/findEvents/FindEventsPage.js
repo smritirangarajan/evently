@@ -6,10 +6,11 @@ import EventCard from './EventCard';
 import { useNavigate } from 'react-router-dom';
 
 function FindEventsPage() {
-  const [events, setEvents] = useState([]);
+  const [groupedEvents, setGroupedEvents] = useState({});
   const [preferences, setPreferences] = useState([]);
-  const [selectedPref, setSelectedPref] = useState(null);
   const [userLocation, setUserLocation] = useState('San Francisco');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -25,13 +26,8 @@ function FindEventsPage() {
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
-          const userData = userSnap.data();
-          const prefs = userData.preferences || [];
+          const prefs = userSnap.data().preferences || [];
           setPreferences(prefs);
-
-          if (prefs.length > 0) {
-            setSelectedPref(prefs[0]);
-          }
         }
       } catch (err) {
         console.error('Failed to load preferences:', err);
@@ -42,97 +38,119 @@ function FindEventsPage() {
     loadPreferences();
   }, []);
 
-  // Fetch events when selectedPref or location changes
+  // Fetch grouped events by preference
   useEffect(() => {
-    const fetchEvents = async () => {
-      if (!selectedPref || !userLocation) return;
-
+    const fetchGrouped = async () => {
+      if (!preferences.length) return;
       setIsLoading(true);
-      setError(null);
 
-      try {
-        const res = await axios.get('/api/events/ticketmaster', {
-          params: {
-            mood: selectedPref.toLowerCase(),
-            location: userLocation
-          }
-        });
+      const results = {};
 
-        if (Array.isArray(res.data)) {
-          setEvents(res.data);
-        } else {
-          setEvents([]);
+      await Promise.all(preferences.map(async (pref) => {
+        try {
+          const res = await axios.get('/api/events/ticketmaster', {
+            params: { keyword: pref, location: userLocation }
+          });
+          results[pref] = res.data;
+        } catch (err) {
+          console.error(`Error fetching for ${pref}:`, err);
+          results[pref] = [];
         }
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError('Failed to fetch events.');
-        setEvents([]);
-      } finally {
-        setIsLoading(false);
-      }
+      }));
+
+      setGroupedEvents(results);
+      setIsLoading(false);
     };
 
-    fetchEvents();
-  }, [selectedPref, userLocation]);
+    fetchGrouped();
+  }, [preferences, userLocation]);
 
-  const handlePreferenceClick = (pref) => {
-    setSelectedPref(pref);
-  };
-
+  // Handle event addition
   const handleAddEvent = async (event) => {
     try {
       const user = auth.currentUser;
       if (!user) return;
 
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        myEvents: arrayUnion(event)
-      });
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { myEvents: arrayUnion(event) });
 
       alert('✅ Event added to your list!');
-    } catch (error) {
-      console.error('Error adding event:', error);
+    } catch (err) {
+      console.error('Add event failed:', err);
+    }
+  };
+
+  // Handle search
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await axios.get('/api/events/ticketmaster', {
+        params: { keyword: searchQuery, location: userLocation }
+      });
+      setSearchResults(res.data || []);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setError('Search failed.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Recommended Events for You</h1>
+      <h1 className="text-2xl font-bold mb-6">Events</h1>
 
-      <div className="flex flex-wrap gap-3 mb-6">
-        {preferences.map((pref) => (
-          <button
-            key={pref}
-            onClick={() => handlePreferenceClick(pref)}
-            className={`px-4 py-2 rounded-full text-sm transition duration-200 ${
-              selectedPref === pref
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-200 text-gray-800 hover:bg-orange-200'
-            }`}
-          >
-            {pref}
-          </button>
-        ))}
+      {/* Search Section */}
+      <div className="flex mb-6 items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search for Events"
+          className="p-2 border rounded w-full sm:w-1/2"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button onClick={handleSearch} className="bg-black text-white px-4 py-2 rounded">Search</button>
       </div>
 
-      {isLoading ? (
-        <p className="text-gray-600">Loading events...</p>
-      ) : error ? (
-        <p className="text-red-500">{error}</p>
-      ) : events.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {events.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onViewDetails={() => navigate(`/event/${event.id}`, { state: { event } })}
-              onAddEvent={handleAddEvent}
-            />
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-600">No events found for "{selectedPref}" in San Francisco</p>
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <>
+          <h2 className="text-xl font-semibold mb-2">Search Results</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+            {searchResults.map(event => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onViewDetails={() => navigate(`/event/${event.id}`, { state: { event } })}
+                onAddEvent={handleAddEvent}
+              />
+            ))}
+          </div>
+        </>
       )}
+
+      {/* Grouped by Preferences */}
+      {Object.entries(groupedEvents).map(([pref, events]) => (
+        <div key={pref} className="mb-10">
+          <h2 className="text-lg font-semibold mb-4">Events related to {pref}</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {events.map(event => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onViewDetails={() => navigate(`/event/${event.id}`, { state: { event } })}
+                onAddEvent={handleAddEvent}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {isLoading && <p className="text-gray-600">Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   );
 }

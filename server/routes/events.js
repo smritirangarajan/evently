@@ -1,11 +1,49 @@
 const express = require('express');
 const router = express.Router();
-const eventsController = require('../controllers/eventsController');
+const axios = require('axios');
 
-// Example route for Ticketmaster search
-router.get('/ticketmaster', eventsController.searchTicketmasterEvents);
-
-// Example route for Eventbrite search
-router.get('/eventbrite', eventsController.searchEventbriteEvents);
+router.get('/ticketmaster', async (req, res) => {
+    const { mood, location, keyword } = req.query;
+    console.log('Request received:', { mood, location, keyword });
+  
+    try {
+      const apiKey = process.env.TICKETMASTER_API_KEY;
+      
+      // Simplify the params to match your working URL structure
+      const params = {
+        apikey: apiKey,
+        keyword: keyword || 'concerts', // Use 'concerts' as default keyword
+        city: location || 'San Francisco'
+      };
+      
+      console.log('Sending request with params:', params);
+  
+      const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', { params });
+      
+      // Log the response structure to understand what we're getting back
+      console.log('Response status:', response.status);
+      console.log('Response has _embedded:', !!response.data._embedded);
+      console.log('Response has events:', !!response.data._embedded?.events);
+      
+      // If we have events, send them back
+      if (response.data._embedded && response.data._embedded.events) {
+        return res.json(response.data._embedded.events);
+      }
+      
+      // If we don't have events, send an empty array
+      return res.json([]);
+    } catch (err) {
+      console.error('Ticketmaster API error:', err.message);
+      // Add more detailed error logging
+      if (err.response) {
+        console.error('Error status:', err.response.status);
+        console.error('Error data:', err.response.data);
+      }
+      res.status(500).json({ 
+        error: 'Failed to fetch events from Ticketmaster',
+        message: err.message
+      });
+    }
+  });
 
 module.exports = router;
