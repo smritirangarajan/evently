@@ -27,13 +27,13 @@ export default function SignUp() {
 
   const eventOptions = [
     "Concerts", "Theater", "Comedy", "Film", "Art Exhibits", "Dance",
-    "Workshops", "Tech Meetups", "Startup Events", "Fitness", "Yoga",
-    "Outdoor Adventures", "Food Festivals", "Cooking Classes", "Book Clubs",
-    "Game Nights", "Networking", "Career Fairs", "Hackathons", "Volunteering",
-    "Environmental Causes", "LGBTQ+ Events", "Cultural Festivals", "Museum Tours",
-    "Poetry Readings", "Photography", "Travel Meetups", "Wellness Retreats",
-    "Parenting Events", "Pet Meetups", "Spiritual Gatherings", "Live Podcasts"
+    "Classical Music", "Festivals", "Nightlife", "Sports", "Family",
+    "Outdoor Adventures", "Food & Wine", "Cooking", "Fitness", "Yoga",
+    "Meditation", "Books & Literature", "Poetry", "Technology", "Startups",
+    "Hackathons", "Science & Space", "Environment", "Sustainability",
+    "Pet Events", "Photography", "Cultural Events", "Spirituality", "Wellness"
   ];
+  
 
   const handleChange = (e) => {
     const { name, value, type, selectedOptions } = e.target;

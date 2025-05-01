@@ -1,73 +1,90 @@
 const axios = require('axios');
+const Fuse = require('fuse.js');
 
+// Expanded keyword map for richer fuzzy matching
 const keywordMap = {
-  "concerts": ["concert", "music", "live"],
-  "theater": ["theater", "musical", "broadway"],
-  "comedy": ["comedy", "stand up", "humor"],
-  "film": ["movie", "film screening", "cinema"],
-  "art exhibits": ["art", "gallery", "exhibit"],
-  "dance": ["dance", "ballet", "performance"],
-  // optional moods still supported
-  "chill": ["theater", "art", "classical music"],
-  "party": ["concert", "music festival", "nightlife"],
-  "sports": ["sports", "basketball", "soccer"],
-  "family": ["family", "kids", "community"],
-  "adventure": ["outdoor", "hiking", "festivals"],
-  "foodie": ["food festival", "wine tasting", "culinary"]
+  concerts: ["concert", "music", "live", "gig", "orchestra", "performance", "headliner"],
+  theater: ["theater", "musical", "broadway", "stage", "play", "drama"],
+  comedy: ["comedy", "stand up", "humor", "laugh", "sketch", "improv"],
+  film: ["movie", "film screening", "cinema", "indie film", "documentary", "short film"],
+  "art exhibits": ["art", "gallery", "exhibit", "installation", "sculpture", "modern art"],
+  dance: ["dance", "ballet", "performance", "hip hop", "salsa", "jazz dance"],
+  chill: ["theater", "art", "classical music", "instrumental", "ambient", "acoustic"],
+  party: ["concert", "festival", "nightlife", "DJ", "rave", "club", "afterparty"],
+  sports: ["sports", "basketball", "soccer", "baseball", "football", "tennis", "mma", "racing"],
+  family: ["family", "kids", "children", "community", "pets", "storybook", "puppet show"],
+  adventure: ["outdoor", "hiking", "festivals", "exploration", "camping", "climbing", "kayaking"],
+  foodie: ["food", "wine", "culinary", "tasting", "cooking", "gourmet", "baking", "farmers market"],
+  fitness: ["fitness", "yoga", "workout", "pilates", "gym", "crossfit", "bootcamp", "meditation", "spin"],
+  literature: ["books", "book club", "reading", "poetry", "author talk", "storytelling", "literary"],
+  tech: ["technology", "startups", "coding", "AI", "blockchain", "web3", "product management", "hackathon", "data science"],
+  science: ["science", "astronomy", "biology", "physics", "engineering", "space", "lab tour"],
+  environment: ["environment", "climate", "sustainability", "ecology", "wildlife", "green energy"]
 };
 
+const allKeywords = Object.values(keywordMap).flat();
+const fuse = new Fuse(allKeywords, { threshold: 0.45 });
 
 module.exports = {
   searchTicketmasterEvents: async (req, res) => {
     try {
-      const { location, mood } = req.query;
+      const { location, mood, city, keyword } = req.query;
+      const resolvedLocation = location || city;
 
-      const moodKeywords = keywordMap[mood?.toLowerCase()] || ["music"];
-      const keyword = moodKeywords[Math.floor(Math.random() * moodKeywords.length)];
+      let resolvedKeyword = keyword;
 
-      console.log(`Searching Ticketmaster for: ${keyword} in ${location}`);
+      if (!resolvedKeyword && mood) {
+        const moodKeywords = keywordMap[mood.toLowerCase()] || ["music"];
+        resolvedKeyword = moodKeywords[Math.floor(Math.random() * moodKeywords.length)];
+      }
+
+      if (!resolvedLocation || !resolvedKeyword) {
+        return res.status(400).json({ error: "Missing city/location or keyword/mood." });
+      }
+
+      const fuzzyMatch = fuse.search(resolvedKeyword);
+      const bestKeyword = fuzzyMatch.length > 0 ? fuzzyMatch[0].item : resolvedKeyword;
+
+      console.log(`🔍 Searching Ticketmaster for: "${bestKeyword}" in ${resolvedLocation}`);
 
       const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
         params: {
           apikey: process.env.TICKETMASTER_API_KEY,
-          city: location,
-          keyword: keyword
+          city: resolvedLocation,
+          keyword: bestKeyword
         }
       });
 
-      const events = response.data._embedded?.events || [];
-      if (events.length === 0) {
-        return res.status(200).json({ message: "No events found for your search. Try a different mood!" });
-      }
-      res.json(events);
+      let events = response.data._embedded?.events || [];
 
+      // Try the next closest fuzzy match if no results were found
+      if (events.length === 0 && fuzzyMatch.length > 1) {
+        const nextBestKeyword = fuzzyMatch[1].item;
+        console.log(`⚠️ No events found for "${bestKeyword}". Trying fallback keyword: "${nextBestKeyword}"`);
+
+        const retryResponse = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
+          params: {
+            apikey: process.env.TICKETMASTER_API_KEY,
+            city: resolvedLocation,
+            keyword: nextBestKeyword
+          }
+        });
+
+        events = retryResponse.data._embedded?.events || [];
+
+        if (events.length > 0) {
+          return res.json({ message: `No results for "${bestKeyword}". Showing results for "${nextBestKeyword}" instead.`, events });
+        }
+      }
+
+      if (events.length === 0) {
+        return res.status(200).json({ message: `No events found for "${resolvedKeyword}". Try another search.` });
+      }
+
+      res.json(events);
     } catch (error) {
-      console.error('Error fetching Ticketmaster events:', error.response?.data || error.message);
+      console.error('❌ Error fetching Ticketmaster events:', error.response?.data || error.message);
       res.status(500).json({ error: 'Failed to fetch Ticketmaster events' });
     }
-  },
-
-  searchEventbriteEvents: async (req, res) => {
-    try {
-      const { location, keyword } = req.query;
-
-      const response = await axios({
-        method: 'GET',
-        url: 'https://www.eventbriteapi.com/v3/events/search/',
-        headers: {
-          Authorization: `Bearer ${process.env.EVENTBRITE_API_KEY}`
-        },
-        params: {
-          'location.address': location,
-          'q': keyword
-        }
-      });
-
-      const events = response.data.events || [];
-      res.json(events);
-
-    } catch (error) {
-      console.error('Error fetching Eventbrite events:', error.response?.data || error.message);
-      res.status(500).json({ error: 'Failed to fetch Eventbrite events' });
-    }}
+  }
 };
