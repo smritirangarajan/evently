@@ -4,6 +4,7 @@ import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import axios from 'axios';
 import EventCard from './EventCard';
 import { useNavigate } from 'react-router-dom';
+import './findEvents.css';
 
 function FindEventsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,30 +49,29 @@ function FindEventsPage() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Events</h1>
+    <div className="find-events-page">
+      <h1 className="find-events-title">Events</h1>
 
       {/* Search Section */}
-      <div className="flex mb-6 items-center gap-2">
+      <div className="search-bar">
         <input
           type="text"
           placeholder="Search for Events"
-          className="p-2 border rounded w-full sm:w-1/2"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <button onClick={handleSearch} className="bg-black text-white px-4 py-2 rounded">Search</button>
+        <button onClick={handleSearch}>Search</button>
       </div>
 
       {/* Search Results */}
       {isLoading ? (
-        <p className="text-gray-600">Loading...</p>
+        <p>Loading...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p style={{ color: 'red' }}>{error}</p>
       ) : searchResults.length > 0 ? (
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Events related to "{searchQuery}"</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="results-section">
+          <h2>Events related to "{searchQuery}"</h2>
+          <div className="event-grid">
             {searchResults.map(event => (
               <EventCard
                 key={event.id}
@@ -83,7 +83,7 @@ function FindEventsPage() {
           </div>
         </div>
       ) : (
-        <p className="text-gray-600">No results found.</p>
+        <p>No results found.</p>
       )}
     </div>
   );

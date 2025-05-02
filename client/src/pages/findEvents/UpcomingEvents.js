@@ -4,6 +4,7 @@ import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import axios from 'axios';
 import EventCard from './EventCard';
 import { useNavigate } from 'react-router-dom';
+import './upcomingEvents.css';
 
 function UpcomingEvents() {
   const [events, setEvents] = useState([]);
@@ -14,7 +15,6 @@ function UpcomingEvents() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Load preferences on mount
   useEffect(() => {
     const loadPreferences = async () => {
       try {
@@ -42,7 +42,6 @@ function UpcomingEvents() {
     loadPreferences();
   }, []);
 
-  // Fetch events when selectedPref or location changes
   useEffect(() => {
     const fetchEvents = async () => {
       if (!selectedPref || !userLocation) return;
@@ -54,7 +53,7 @@ function UpcomingEvents() {
         const res = await axios.get('/api/events/ticketmaster', {
           params: {
             keyword: selectedPref.toLowerCase(),
-            city: userLocation // ✅ changed 'location' to 'city'
+            city: userLocation
           }
         });
 
@@ -96,19 +95,15 @@ function UpcomingEvents() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Recommended Events for You</h1>
+    <div className="upcoming-events-page">
+      <h1 className="upcoming-events-title">Recommended Events for You</h1>
 
-      <div className="flex flex-wrap gap-3 mb-6">
+      <div className="preferences-bar">
         {preferences.map((pref) => (
           <button
             key={pref}
             onClick={() => handlePreferenceClick(pref)}
-            className={`px-4 py-2 rounded-full text-sm transition duration-200 ${
-              selectedPref === pref
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-200 text-gray-800 hover:bg-orange-200'
-            }`}
+            className={`pref-button ${selectedPref === pref ? 'selected' : ''}`}
           >
             {pref}
           </button>
@@ -116,11 +111,11 @@ function UpcomingEvents() {
       </div>
 
       {isLoading ? (
-        <p className="text-gray-600">Loading events...</p>
+        <p>Loading events...</p>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p style={{ color: 'red' }}>{error}</p>
       ) : events.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <div className="event-grid">
           {events.map((event) => (
             <EventCard
               key={event.id}
@@ -131,7 +126,7 @@ function UpcomingEvents() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-600">No events found for "{selectedPref}" in San Francisco</p>
+        <p>No events found for "{selectedPref}" in San Francisco</p>
       )}
     </div>
   );

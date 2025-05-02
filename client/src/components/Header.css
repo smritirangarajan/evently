@@ -1,0 +1,15 @@
+/* Header.css */
+.site-header {
+    padding: 1rem 2rem;
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .site-logo {
+    height: 40px;
+    object-fit: contain;
+  }
+  

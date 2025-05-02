@@ -1,0 +1,51 @@
+/* upcomingEvents.css */
+
+.upcoming-events-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2937;
+  }
+  
+  .upcoming-events-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .preferences-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .pref-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 9999px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background-color: #e5e7eb;
+    color: #1f2937;
+    transition: background-color 0.2s ease;
+  }
+  
+  .pref-button:hover {
+    background-color: #d1d5db;
+  }
+  
+  .pref-button.selected {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-top: 1rem;
+  }
+  

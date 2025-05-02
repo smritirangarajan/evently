@@ -1,36 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import './eventDetails.css';
 
 function EventDetailsPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams(); // for deep linking in the future
+  const params = useParams();
   const [event, setEvent] = useState(location.state?.event || null);
 
-  // Optional: fetch event by ID if not passed via navigation
-  // useEffect(() => {
-  //   if (!event && params.id) {
-  //     axios.get(`/api/events/${params.id}`).then(res => {
-  //       setEvent(res.data);
-  //     });
-  //   }
-  // }, [params.id]);
-
-  if (!event) return <div className="p-6 text-gray-600">Event not found.</div>;
+  if (!event) return <div className="event-details-container">Event not found.</div>;
 
   const imageUrl = event.images?.[0]?.url;
   const attractions = event._embedded?.attractions || [];
   const venue = event._embedded?.venues?.[0];
   const date = new Date(event.dates?.start?.dateTime || event.dates?.start?.localDate);
-  const formattedDate = date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const formattedDate = date.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
   const time = event.dates?.start?.localTime
-  ? new Date(`${event.dates?.start?.localDate}T${event.dates?.start?.localTime}`).toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    })
-  : null;
-
+    ? new Date(`${event.dates?.start?.localDate}T${event.dates?.start?.localTime}`).toLocaleTimeString([], {
+        hour: 'numeric', minute: '2-digit', hour12: true,
+      })
+    : null;
 
   const addToGoogleCalendar = () => {
     const startDateTime = event.dates?.start?.dateTime || event.dates?.start?.localDate;
@@ -46,21 +37,16 @@ function EventDetailsPage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <button
-        onClick={() => navigate('/find-events')}
-        className="text-blue-500 text-sm mb-4 hover:underline"
-      >
-        ← Back to Events
-      </button>
+    <div className="event-details-container">
 
-      <h1 className="text-4xl font-bold mb-4">{event.name}</h1>
+
+      <h1 className="event-title">{event.name}</h1>
 
       {imageUrl && (
-        <img src={imageUrl} alt={event.name} className="w-full h-96 object-cover rounded-lg mb-6" />
+        <img src={imageUrl} alt={event.name} className="event-image" />
       )}
 
-      <div className="mb-6 text-lg space-y-2">
+      <div className="event-info">
         <p><strong>Date:</strong> {formattedDate}</p>
         {time && <p><strong>Time:</strong> {time}</p>}
         {venue && (
@@ -68,11 +54,12 @@ function EventDetailsPage() {
             <p><strong>Venue:</strong> {venue.name}</p>
             <p><strong>Address:</strong> {venue.address?.line1}, {venue.city?.name}, {venue.state?.name} {venue.postalCode}</p>
             {venue.location && (
-              <p className="text-sm text-blue-500 hover:underline">
+              <p>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${venue.location.latitude},${venue.location.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="back-button"
                 >
                   View on Google Maps
                 </a>
@@ -84,17 +71,31 @@ function EventDetailsPage() {
       </div>
 
       {attractions.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-3">Artists / Attractions</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
+        <div className="attractions-section">
+          <h2>Artists / Attractions</h2>
+          <div className="attractions-grid">
             {attractions.map((artist) => (
-              <div key={artist.id} className="p-4 border rounded-lg bg-gray-50">
-                <p className="font-semibold">{artist.name}</p>
+              <div key={artist.id} className="artist-card">
+                <p className="artist-name">{artist.name}</p>
                 {artist.externalLinks?.facebook && (
-                  <p><a href={artist.externalLinks.facebook[0]?.url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">Facebook</a></p>
+                  <a
+                    href={artist.externalLinks.facebook[0]?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="artist-link facebook"
+                  >
+                    Facebook
+                  </a>
                 )}
                 {artist.externalLinks?.instagram && (
-                  <p><a href={artist.externalLinks.instagram[0]?.url} target="_blank" rel="noreferrer" className="text-pink-500 hover:underline">Instagram</a></p>
+                  <a
+                    href={artist.externalLinks.instagram[0]?.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="artist-link instagram"
+                  >
+                    Instagram
+                  </a>
                 )}
               </div>
             ))}
@@ -102,23 +103,19 @@ function EventDetailsPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-4">
+      <div className="action-buttons">
         {event.url && (
           <a
             href={event.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
           >
-            🎟 Book Tickets
+            Book Tickets
           </a>
         )}
 
-        <button
-          onClick={addToGoogleCalendar}
-          className="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded"
-        >
-          📅 Add to Google Calendar
+        <button onClick={addToGoogleCalendar}>
+          Add to Google Calendar
         </button>
       </div>
     </div>

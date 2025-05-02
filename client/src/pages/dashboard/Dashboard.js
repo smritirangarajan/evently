@@ -1,24 +1,62 @@
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import './dashboard.css';
 
 function Dashboard() {
-  const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const savedEvents = userSnap.data().myEvents || [];
+        const calendarEvents = savedEvents.map((event) => {
+          const date = new Date(event.dates?.start?.dateTime || event.dates?.start?.localDate);
+          return {
+            title: event.name,
+            day: date.getDate(),
+            month: date.getMonth(),
+            year: date.getFullYear(),
+          };
+        });
+        setEvents(calendarEvents);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const renderCalendar = () => {
+    const calendar = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+      const match = events.find(e => e.day === day && e.month === month && e.year === year);
+      calendar.push(
+        <div key={day} className={`calendar-day${match ? ' has-event' : ''}`}>
+          <div className="day-number">{day}</div>
+          {match && <div className="event-label">{match.title}</div>}
+        </div>
+      );
+    }
+    return calendar;
+  };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Welcome to Evently!</h1>
-
-      {/* FIND EVENTS BUTTON */}
-      <button 
-        className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
-        onClick={() => navigate('/find-events')}
-      >
-        Find Events
-      </button>
-      <button onClick={() => navigate('/my-events')}>My Events</button>
-      <button onClick={() => navigate('/upcoming-events')}>Upcoming Events</button>
-
-
-      {/* Other dashboard content can go below */}
+    <div className="dashboard-page">
+      <h1 className="dashboard-title">My Event Calendar</h1>
+      <div className="custom-calendar">
+        {renderCalendar()}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,62 @@
+/* dashboard.css */
+
+.dashboard-page {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2937;
+  }
+  
+  .dashboard-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .custom-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .calendar-day {
+    height: 100px;
+    border: 1px solid #f3f4f6;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-size: 14px;
+    background-color: #f9fafb;
+  }
+  
+  .calendar-day .day-number {
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .calendar-day.has-event {
+    background-color: #e0f2fe;
+    border: 1px solid #3b82f6;
+  }
+  
+  .event-label {
+    margin-top: 6px;
+    font-size: 13px;
+    background-color: #3b82f6;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }

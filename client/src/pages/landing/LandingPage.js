@@ -1,26 +1,20 @@
 // src/pages/landing/LandingPage.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import './LandingPage.css';
+import logo from '../../components/logo.png'; // adjust path if needed
 
 function LandingPage() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Welcome!</h1>
-      <div style={{ marginTop: '20px' }}>
-        <button 
-          onClick={() => navigate("/login")} 
-          style={{ margin: '10px', padding: '10px 20px', fontSize: '16px' }}
-        >
-          Log In
-        </button>
-        <button 
-          onClick={() => navigate("/signup")} 
-          style={{ margin: '10px', padding: '10px 20px', fontSize: '16px' }}
-        >
-          Sign Up
-        </button>
+    <div className="landing-container">
+      <img src={logo} alt="Evently Logo" className="landing-logo" />
+      <h1 className="landing-title">Plan Smarter. Attend Better.</h1>
+      <p className="landing-subtitle">Your personalized event dashboard, powered by preferences.</p>
+      <div className="landing-buttons">
+        <button onClick={() => navigate("/login")} className="landing-btn login">Log In</button>
+        <button onClick={() => navigate("/signup")} className="landing-btn signup">Sign Up</button>
       </div>
     </div>
   );
