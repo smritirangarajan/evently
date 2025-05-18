@@ -97,7 +97,6 @@ const handleGoogleSignUp = async () => {
     if (!userDoc.exists()) {
       // New user – redirect to profile completion form
       // For now just alert – we can create a page later
-      console.log("Navigating to /complete-profile");
       alert("Account created. Please complete your profile.");
       // Redirect to: /complete-profile
       navigate("/complete-profile");
