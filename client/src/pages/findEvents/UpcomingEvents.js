@@ -50,7 +50,7 @@ function UpcomingEvents() {
       setError(null);
 
       try {
-        const res = await axios.get('/api/events/ticketmaster', {
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/events/ticketmaster`, {
           params: {
             keyword: selectedPref.toLowerCase(),
             city: userLocation

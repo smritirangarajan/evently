@@ -1,15 +1,10 @@
 // src/pages/signup/signup.js
 import React, { useState } from "react";
 import "./signup.css";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase";
-import { signInWithPopup } from "firebase/auth";
-import { googleProvider } from "../../firebase";
-import { getDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db, googleProvider } from "../../firebase";
 import { useNavigate } from "react-router-dom";
-
-
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -33,7 +28,6 @@ export default function SignUp() {
     "Hackathons", "Science & Space", "Environment", "Sustainability",
     "Pet Events", "Photography", "Cultural Events", "Spirituality", "Wellness"
   ];
-  
 
   const handleChange = (e) => {
     const { name, value, type, selectedOptions } = e.target;
@@ -62,7 +56,6 @@ export default function SignUp() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
-      
 
       await setDoc(doc(db, "users", user.uid), {
         firstName: formData.firstName,
@@ -83,33 +76,34 @@ export default function SignUp() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
 
+      // ✅ Backend check using environment variable
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/users/google-signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid: user.uid, email: user.email }),
+      });
 
-const handleGoogleSignUp = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    
-    
+      const data = await res.json();
 
-    // Check if user doc exists
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (!userDoc.exists()) {
-      // New user – redirect to profile completion form
-      // For now just alert – we can create a page later
-      console.log("Navigating to /complete-profile");
-      alert("Account created. Please complete your profile.");
-      // Redirect to: /complete-profile
-      navigate("/complete-profile");
-    } else {
-      alert("You’ve already signed up with Google.");
-      navigate("/complete-profile");
+      if (data.needsProfileCompletion) {
+        alert("Account created. Please complete your profile.");
+        navigate("/complete-profile");
+      } else {
+        alert("You’ve already signed up with Google.");
+        navigate("/complete-profile");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
     }
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
-};
+  };
 
   return (
     <div className="signup-container">
@@ -132,7 +126,7 @@ const handleGoogleSignUp = async () => {
                 type="checkbox"
                 value={option}
                 checked={formData.preferences.includes(option)}
-                onChange={(e) => {
+                onChange={() => {
                   const selected = formData.preferences.includes(option)
                     ? formData.preferences.filter((pref) => pref !== option)
                     : [...formData.preferences, option];
@@ -144,11 +138,9 @@ const handleGoogleSignUp = async () => {
           ))}
         </div>
 
-
         <button type="submit">Sign Up</button>
-
         <button type="button" className="google-signup" onClick={handleGoogleSignUp}>
-        Sign Up with Google
+          Sign Up with Google
         </button>
       </form>
     </div>
