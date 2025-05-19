@@ -4,6 +4,7 @@ const axios = require('axios');
 
 router.get('/ticketmaster', async (req, res) => {
     const { mood, location, keyword } = req.query;
+    console.log('Request received:', { mood, location, keyword });
   
     try {
       const apiKey = process.env.TICKETMASTER_API_KEY;
@@ -15,10 +16,14 @@ router.get('/ticketmaster', async (req, res) => {
         city: location || 'San Francisco'
       };
       
+      console.log('Sending request with params:', params);
   
       const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', { params });
       
       // Log the response structure to understand what we're getting back
+      console.log('Response status:', response.status);
+      console.log('Response has _embedded:', !!response.data._embedded);
+      console.log('Response has events:', !!response.data._embedded?.events);
       
       // If we have events, send them back
       if (response.data._embedded && response.data._embedded.events) {
