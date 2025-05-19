@@ -45,7 +45,6 @@ module.exports = {
       const fuzzyMatch = fuse.search(resolvedKeyword);
       const bestKeyword = fuzzyMatch.length > 0 ? fuzzyMatch[0].item : resolvedKeyword;
 
-      console.log(`🔍 Searching Ticketmaster for: "${bestKeyword}" in ${resolvedLocation}`);
 
       const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
         params: {
@@ -60,7 +59,6 @@ module.exports = {
       // Try the next closest fuzzy match if no results were found
       if (events.length === 0 && fuzzyMatch.length > 1) {
         const nextBestKeyword = fuzzyMatch[1].item;
-        console.log(`⚠️ No events found for "${bestKeyword}". Trying fallback keyword: "${nextBestKeyword}"`);
 
         const retryResponse = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
           params: {

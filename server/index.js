@@ -1,5 +1,4 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
-console.log('✅ Loaded Ticketmaster API key:', process.env.TICKETMASTER_API_KEY);
+require('dotenv').config({ path: './server/.env' });
 
 
 const express = require("express");
